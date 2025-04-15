@@ -119,7 +119,8 @@ extension DetailScreenViewController: IDetailScreenView {
         if let coredataImage = model.image {
             photoImageView.image = coredataImage
         } else {
-            photoImageView.kf.setImage(with: url, placeholder: UIImage(systemName: "xmark")) { [weak self] result in
+            photoImageView.kf.indicatorType = .activity
+            photoImageView.kf.setImage(with: url) { [weak self] result in
                 switch result {
                 case .success(let retrivedImage):
                     DispatchQueue.main.async {

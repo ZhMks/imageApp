@@ -49,6 +49,7 @@ extension MainScreenViewController: UICollectionViewDataSource {
         cell.updateCell(model: dataForCell)
         return cell
     }
+    
 }
 // MARK: - collectionView Delegate
 extension MainScreenViewController: UICollectionViewDelegateFlowLayout {
@@ -126,6 +127,13 @@ extension MainScreenViewController: IMainScreenView {
     func showDetailScreen(_ controller: UIViewController) {
         DispatchQueue.main.async {
             self.navigationController?.pushViewController(controller, animated: true)
+        }
+    }
+    func reloadItemsAt(indexPath: [IndexPath]) {
+        DispatchQueue.main.async {
+            self.mainScreenCollectionView.performBatchUpdates {
+                self.mainScreenCollectionView.insertItems(at: indexPath)
+            }
         }
     }
 }

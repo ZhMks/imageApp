@@ -28,20 +28,14 @@ final class MainCollectionCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        ImageCache.default.clearCache()
-    }
     // MARK: - funcs
     func updateCell(model: MainScreenModel) {
         let url = URL(string: model.links.raw)
         photoImageView.kf.indicatorType = .activity
         photoImageView.kf.setImage(
             with: url,
-            placeholder: UIImage(systemName: "xmark"),
             options: [
-                .transition(.fade(0.5))
+                .transition(.fade(0.1))
             ]
         ) { [weak self] result in
             switch result {
