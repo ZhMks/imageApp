@@ -15,6 +15,7 @@ protocol IMainScreenView: AnyObject {
     func showDetailScreen(_ controller: UIViewController)
     func updateData()
     func showErrorAlert(_ error: Error)
+    func reloadItemsAt(indexPath: [IndexPath])
 }
 // MARK: - presenter
 final class MainScreenPresenter: IMainScreePresenter {
@@ -70,6 +71,7 @@ final class MainScreenPresenter: IMainScreePresenter {
     }
     
     func fetchMoreImages(page: Int) {
+        let oldCount = modelList.count 
         dataService.fetchMoreData(page: page) { [weak self] result in
             switch result {
             case .success(let success):
@@ -77,7 +79,12 @@ final class MainScreenPresenter: IMainScreePresenter {
                 nsLock.lock()
                 self?.modelList.append(contentsOf: success)
                 nsLock.unlock()
-                self?.view?.updateData()
+                guard let newCount = self?.modelList.count else { return }
+                var newIndexPaths = [IndexPath]()
+                for index in oldCount..<newCount {
+                    newIndexPaths.append(IndexPath(item: index, section: 0))
+                }
+                self?.view?.reloadItemsAt(indexPath: newIndexPaths)
             case .failure(let failure):
                 self?.view?.showErrorAlert(failure)
             }
@@ -85,6 +92,7 @@ final class MainScreenPresenter: IMainScreePresenter {
     }
     
     func searchPhoto(page: Int, query: String) {
+        let oldCount = searchedList.count
         let nsLock = NSLock()
         dataService.searchPhoto(page: page, query: query) { [weak self] result in
             switch result {
@@ -95,18 +103,25 @@ final class MainScreenPresenter: IMainScreePresenter {
                     nsLock.lock()
                     self?.searchedList = success
                     nsLock.unlock()
+                    self?.view?.updateData()
                 } else {
                     if page != 1 {
                         nsLock.lock()
                         self?.searchedList.append(contentsOf: success)
                         nsLock.unlock()
+                        guard let newCount = self?.searchedList.count else { return }
+                        var newIndexPaths = [IndexPath]()
+                        for index in oldCount..<newCount {
+                            newIndexPaths.append(IndexPath(item: index, section: 0))
+                        }
+                        self?.view?.reloadItemsAt(indexPath: newIndexPaths)
                     } else {
                         nsLock.lock()
                         self?.searchedList = success
                         nsLock.unlock()
+                        self?.view?.updateData()
                     }
                 }
-                self?.view?.updateData()
             case .failure(let failure):
                 self?.view?.showErrorAlert(failure)
             }
